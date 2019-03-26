@@ -16,13 +16,13 @@ def getAccounts():
         'identity' : 'Group8'
     }
     debit_acc = requests.get(endpoint_debit, headers=headers)
-    acc_dict['debit'] = debit_acc.text
+    acc_dict['debit'] = ast.literal_eval(debit_acc.text)
 
     
     endpoint_credit = 'http://api-gateway-dbs-techtrek.ap-southeast-1.elasticbeanstalk.com/accounts/credit/{}'.format(cutomer_id)
     
     credit_acc = requests.get(endpoint_credit, headers=headers)
-    acc_dict['credit'] = credit_acc.text
+    acc_dict['credit'] = ast.literal_eval(credit_acc.text)
 
 
     return jsonify(acc_dict)
