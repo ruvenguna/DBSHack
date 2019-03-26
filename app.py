@@ -49,6 +49,7 @@ def balance():
 def topTransactions():
     myinput = request.get_json()
     acc_id = myinput['accountId']
+    num = int(myinput['numOfTxn']) * -1
     endpoint_topTransactions = 'http://api-gateway-dbs-techtrek.ap-southeast-1.elasticbeanstalk.com/transactions/{}?from=01-01-2019&to=01-31-2019'.format(acc_id)
     headers = {
         'Content-Type' : 'application/json',
@@ -58,7 +59,10 @@ def topTransactions():
     code = requests.get(endpoint_topTransactions, headers=headers)
     all_transactions = ast.literal_eval(code.text)
 
-    return jsonify(all_transactions)
+    return jsonify(all_transactions[num:])
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
