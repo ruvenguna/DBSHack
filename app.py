@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-import requests
+import requests, ast
 
 app = Flask(__name__)
 
@@ -40,10 +40,10 @@ def balance():
         'identity' : 'Group8'
     }
     code = requests.get(endpoint_balance, headers=headers)
-    balance = code.text
+    balance = ast.literal_eval(code.text)
     
     
-    print (balance[" \"])
+    print (type(balance))
 
     return jsonify(balance)
 
