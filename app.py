@@ -94,6 +94,7 @@ def topCat():
     def sortSecond(val): 
         return val[1]
 
+    total_amt_list.sort(key = sortSecond, reverse=True)
     print(total_amt_list)
     return jsonify(total_amt_list)
 
