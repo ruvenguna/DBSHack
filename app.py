@@ -84,10 +84,11 @@ def topCat():
 
     total_amt_dict ={}
     for i in total_num_of_dic:
-        if all_transactions[i]['tag'] in total_amt_dict:
-            total_amt_dict[all_transactions[i]['tag']] += float(all_transactions[i]['amount'])
-        else:
-            total_amt_dict[all_transactions[i]['tag']] = float(all_transactions[i]['amount'])
+        if all_transactions[i]['type'] == 'DEBIT':
+            if all_transactions[i]['tag'] in total_amt_dict:
+                total_amt_dict[all_transactions[i]['tag']] += float(all_transactions[i]['amount'])
+            else:
+                total_amt_dict[all_transactions[i]['tag']] = float(all_transactions[i]['amount'])
 
     total_amt_list = [(k,v) for k,v in total_amt_dict.items()]
     
@@ -98,7 +99,38 @@ def topCat():
     print(total_amt_list)
     return jsonify(total_amt_list)
 
+@app.route("/savings", methods=["POST"])
+def savings():    
+    myinput = request.get_json()
+    acc_id = myinput['accountId']
 
+    endpoint_topTransactions = 'http://api-gateway-dbs-techtrek.ap-southeast-1.elasticbeanstalk.com/transactions/{}?from=01-01-2018&to=01-31-2019'.format(acc_id)
+    headers = {
+        'Content-Type' : 'application/json',
+        'token' : '545a6a5f-f955-48c1-936b-d545eac1aee8',
+        'identity' : 'Group8'
+    }
+    code = requests.get(endpoint_topTransactions, headers=headers)
+    all_transactions = ast.literal_eval(code.text)
+   
+    num = len(all_transactions)
+    total_num_of_dic = list(range(0, num))
+
+    total_amt_dict ={}
+    for i in total_num_of_dic:
+        if all_transactions[i]['type'] == 'DEBIT':
+            if all_transactions[i]['date'][:7] in total_amt_dict:
+                total_amt_dict[all_transactions[i]['date'][:7]] -= float(all_transactions[i]['amount'])
+            else:
+                total_amt_dict[all_transactions[i]['date'][:7]] = float(all_transactions[i]['amount']) * -1
+
+        else:
+            if all_transactions[i]['date'][:7] in total_amt_dict:
+                total_amt_dict[all_transactions[i]['date'][:7]] += float(all_transactions[i]['amount'])
+            else:
+                total_amt_dict[all_transactions[i]['date'][:7]] = float(all_transactions[i]['amount'])
+
+    return jsonify(total_amt_dict)
 
 
 if __name__ == "__main__":
