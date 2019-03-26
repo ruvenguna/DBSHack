@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 import requests, ast
 import operator
+import math
+from statistics import mean 
 
 app = Flask(__name__)
 
@@ -133,6 +135,52 @@ def savings():
     
 
     return jsonify(total_amt_dict)
+
+@app.route("/avg", methods=["POST"])
+def avg():    
+    myinput = request.get_json()
+    acc_id = myinput['accountId']
+
+    endpoint_topTransactions = 'http://api-gateway-dbs-techtrek.ap-southeast-1.elasticbeanstalk.com/transactions/{}?from=01-01-2018&to=01-31-2019'.format(acc_id)
+    headers = {
+        'Content-Type' : 'application/json',
+        'token' : '545a6a5f-f955-48c1-936b-d545eac1aee8',
+        'identity' : 'Group8'
+    }
+    code = requests.get(endpoint_topTransactions, headers=headers)
+    all_transactions = ast.literal_eval(code.text)
+   
+    num = len(all_transactions)
+    total_num_of_dic = list(range(0, num))
+
+    total_amt_dict ={}
+    for i in total_num_of_dic:
+        if all_transactions[i]['type'] == 'DEBIT':
+            if all_transactions[i]['date'][:7] in total_amt_dict:
+                total_amt_dict[all_transactions[i]['date'][:7]] -= float(all_transactions[i]['amount'])
+            else:
+                total_amt_dict[all_transactions[i]['date'][:7]] = float(all_transactions[i]['amount']) * -1
+
+        else:
+            if all_transactions[i]['date'][:7] in total_amt_dict:
+                total_amt_dict[all_transactions[i]['date'][:7]] += float(all_transactions[i]['amount'])
+            else:
+                total_amt_dict[all_transactions[i]['date'][:7]] = float(all_transactions[i]['amount'])
+    
+    amt = []
+    for key, value in total_amt_dict.items():
+        amt.append(value)
+
+    avg = mean(amt)
+    svg_amt = myinput['savingsAmount']
+    num_mth = math.ceil(svg_amt/avg)
+
+    f_dic = {}
+    f_dic['Average Savings'] = avg
+    f_dic['Savings Target'] = svg_amt
+    f_dic['Number of Months needed'] = num_mth
+
+    return jsonify(f_dic)
 
 
 if __name__ == "__main__":
