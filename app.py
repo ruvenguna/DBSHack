@@ -1,7 +1,10 @@
 from flask import Flask, jsonify, request
 import requests, ast
+import operator
 
 app = Flask(__name__)
+
+
 
 @app.route("/getAccounts", methods=["POST"])
 def getAccounts():
@@ -60,6 +63,39 @@ def topTransactions():
     all_transactions = ast.literal_eval(code.text)
 
     return jsonify(all_transactions[num:])
+
+@app.route("/topCat", methods=["POST"])
+def topCat():
+
+    myinput = request.get_json()
+    acc_id = myinput['accountId']
+
+    endpoint_topTransactions = 'http://api-gateway-dbs-techtrek.ap-southeast-1.elasticbeanstalk.com/transactions/{}?from=01-01-2019&to=01-31-2019'.format(acc_id)
+    headers = {
+        'Content-Type' : 'application/json',
+        'token' : '545a6a5f-f955-48c1-936b-d545eac1aee8',
+        'identity' : 'Group8'
+    }
+    code = requests.get(endpoint_topTransactions, headers=headers)
+    all_transactions = ast.literal_eval(code.text)
+   
+    num = len(all_transactions)
+    total_num_of_dic = list(range(0, num))
+
+    total_amt_dict ={}
+    for i in total_num_of_dic:
+        if all_transactions[i]['tag'] in total_amt_dict:
+            total_amt_dict[all_transactions[i]['tag']] += float(all_transactions[i]['amount'])
+        else:
+            total_amt_dict[all_transactions[i]['tag']] = float(all_transactions[i]['amount'])
+
+    total_amt_list = [(k,v) for k,v in total_amt_dict.items()]
+    
+    def sortSecond(val): 
+        return val[1]
+
+    print(total_amt_list)
+    return jsonify(total_amt_list)
 
 
 
