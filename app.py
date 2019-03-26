@@ -180,8 +180,34 @@ def avg():
     f_dic['Savings Target'] = svg_amt
     f_dic['Number of Months needed'] = num_mth
 
+    t_d = myinput['targetDuration']
+    if t_d < num_mth:
+        f_dic['Status'] = False
+
+    else:
+        f_dic['Status'] = True
+
     return jsonify(f_dic)
 
+@app.route("/message", methods=["POST"])
+def message():
+    myinput = request.get_json()
+    customer_id = myinput['customerId']
+    endpoint_balance = 'http://api-gateway-dbs-techtrek.ap-southeast-1.elasticbeanstalk.com/message/{}'.format(customer_id)
+    headers = {
+        'Content-Type' : 'application/json',
+        'token' : '545a6a5f-f955-48c1-936b-d545eac1aee8',
+        'identity' : 'Group8'
+    }
+    code = requests.get(endpoint_topTransactions, headers=headers)
+    all_transactions = ast.literal_eval(code.text)
+
+    list_of_body ={}
+    for i in all_messages:
+        if all_messages[i]['isRead'] == False:
+            list_of_body[all_messages[i]['body']] = all_messages[i]['body']
+
+    return jsonify(list_of_body)
 
 if __name__ == "__main__":
     app.run(debug=True)
