@@ -41,11 +41,9 @@ def balance():
     }
     code = requests.get(endpoint_balance, headers=headers)
     balance = ast.literal_eval(code.text)
-    
-    
-    print (type(balance))
+    bal_dict = {'availableBalance' : float(balance['availableBalance'])}
 
-    return jsonify(balance)
+    return jsonify(bal_dict)
 
 
 if __name__ == "__main__":
