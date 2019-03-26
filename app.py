@@ -129,6 +129,8 @@ def savings():
                 total_amt_dict[all_transactions[i]['date'][:7]] += float(all_transactions[i]['amount'])
             else:
                 total_amt_dict[all_transactions[i]['date'][:7]] = float(all_transactions[i]['amount'])
+    
+    
 
     return jsonify(total_amt_dict)
 
